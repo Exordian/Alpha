@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -79,9 +78,9 @@ public class DefaultSolver extends AbstractSolver {
 			} else if ((nextChoice = computeChoice()) != 0) {
 				doChoice(nextChoice);
 				LOGGER.debug("Choice: stack size: {}, choice stack: {}", choiceStack.size(), choiceStack);
-			} else if (!allAtomsAssigned()) {
+			} else if (!grounder.getUnassignedAtoms(assignment).isEmpty()) {
 				LOGGER.debug("Closing unassigned known atoms (assigning FALSE).");
-				assignUnassignedToFalse();
+				store.close();
 				didChange = true;
 			} else if (assignment.getMBTCount() == 0) {
 				AnswerSet as = translate(assignment.getTrueAssignments());
@@ -97,18 +96,6 @@ public class DefaultSolver extends AbstractSolver {
 				}
 			}
 		}
-	}
-
-	private void assignUnassignedToFalse() {
-		for (Integer atom : unassignedAtoms) {
-			store.assign(atom, FALSE);
-		}
-	}
-
-	private List<Integer> unassignedAtoms;
-	private boolean allAtomsAssigned() {
-		unassignedAtoms = grounder.getUnassignedAtoms(assignment);
-		return unassignedAtoms.isEmpty();
 	}
 
 	private void doBacktrack() {

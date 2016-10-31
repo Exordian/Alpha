@@ -473,6 +473,39 @@ class BasicNoGoodStore implements NoGoodStore<ThriceTruth> {
 		return propagated;
 	}
 
+	@Override
+	public void close() {
+		for (Watches<BinaryWatch, WatchedNoGood> watches : this.watches.values()) {
+			for (WatchedNoGood wng : watches.n.get(MBT)) {
+				close(wng);
+			}
+
+			for (WatchedNoGood wng : watches.n.get(FALSE)) {
+				close(wng);
+			}
+
+			for (BinaryWatch w : watches.b.get(MBT)) {
+				final NoGood noGood = binaries.get(w.getId());
+				assign(noGood.getAtom(w.getOtherLiteralIndex()), FALSE);
+			}
+
+			for (BinaryWatch w : watches.b.get(FALSE)) {
+				final NoGood noGood = binaries.get(w.getId());
+				assign(noGood.getAtom(w.getOtherLiteralIndex()), FALSE);
+			}
+		}
+	}
+
+	private void close(WatchedNoGood wng) {
+		for (int i = 0; i < 2; i++) {
+			final int atom = wng.getAtom(wng.getPointer(i));
+			if (assignment.isAssigned(atom)) {
+				continue;
+			}
+			assign(atom, FALSE);
+		}
+	}
+
 	private int toPriority(int atom) {
 		final Assignment.Entry entry = assignment.get(atom);
 		if (entry == null) {

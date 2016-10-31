@@ -29,6 +29,12 @@ public interface NoGoodStore<T extends ThriceTruth> {
 	 */
 	boolean add(int id, NoGood noGood);
 
+	/**
+	 * Closes the underlying assignment by assigning all
+	 * unassigned watched literals to {@link ThriceTruth#FALSE}.
+	 */
+	void close();
+
 	default boolean addAll(Map<Integer, ? extends NoGood> m) {
 		for (Map.Entry<Integer, ? extends NoGood> e : m.entrySet()) {
 			if (!add(e.getKey(), e.getValue())) {
